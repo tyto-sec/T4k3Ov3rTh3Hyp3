@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  takeover_scanner:
+    build: .
+    volumes:
+      - ./domains.txt:/app/domains.txt
+      - ./takeover_output:/app/takeover_output
+    command: ["-f", "/app/domains.txt"]

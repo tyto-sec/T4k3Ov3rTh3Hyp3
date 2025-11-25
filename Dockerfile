@@ -17,6 +17,10 @@ RUN wget -q -O - https://api.github.com/repos/projectdiscovery/httpx/releases/la
     unzip httpx_*_linux_amd64.zip -d /usr/local/bin && \
     rm httpx_*_linux_amd64.zip
 
+RUN wget -q -O - https://api.github.com/repos/tomnomnom/anew/releases/latest | grep "browser_download_url.*linux_amd64.tar.gz" | cut -d '"' -f 4 | wget -qi - && \
+    tar -xzf anew*linux_amd64.tar.gz -C /usr/local/bin && \
+    rm anew*linux_amd64.tar.gz
+
 RUN wget -q -O - https://api.github.com/repos/projectdiscovery/nuclei/releases/latest | grep "browser_download_url.*linux_amd64.zip" | cut -d '"' -f 4 | wget -qi - && \
     unzip nuclei_*_linux_amd64.zip -d /usr/local/bin && \
     rm nuclei_*_linux_amd64.zip

@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Takeover Scanner",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/takeover_scanner.py",
+            "args": [
+                "-f",
+                "domains.txt"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "envFile": "${workspaceFolder}/.env",
+            "stopOnEntry": false,
+            "justMyCode": true
+        }
+    ]
+}

@@ -6,22 +6,8 @@ import argparse
 import csv
 import sys
 
-TAKEOVER_MAP = {
-    "amazonaws": "takeovers/amazon-bucket-takeover.yaml",
-    "s3.amazonaws": "takeovers/amazon-bucket-takeover.yaml",
-    "heroku": "takeovers/heroku-takeover.yaml",
-    "github": "takeovers/github-takeover.yaml",
-    "cloudfront": "takeovers/cloudfront-takeover.yaml",
-    "fastly": "takeovers/fastly-takeover.yaml",
-    "azurewebsites": "takeovers/azure-takeover.yaml",
-    "cloudapp": "takeovers/azure-takeover.yaml",
-    "netlify": "takeovers/netlify-takeover.yaml",
-    "zendesk": "takeovers/zendesk-takeover.yaml",
-    "unbounce": "takeovers/unbounce-takeover.yaml",
-    "stripe": "takeovers/stripe-takeover.yaml",
-}
 
-NUCLEI_TEMPLATE_DIR = os.path.expanduser("~/nuclei-templates/")
+NUCLEI_TEMPLATE_DIR = os.path.expanduser("~/nuclei-templates/http/takeovers")
 OUTPUT_DIR = "takeover_output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -40,7 +26,7 @@ def read_domains(file_path):
 def enum_subdomains(domain_list_file):
     print("[*] Subdomain enumeration...")
     output_file = os.path.join(OUTPUT_DIR, "subs.txt")
-    cmd = f"cat {domain_list_file} | subfinder -dL -silent | anew"
+    cmd = f"subfinder -dL {domain_list_file} | anew"
     subs = run_cmd(cmd)
     if subs:
         with open(output_file, "w") as f:
@@ -50,80 +36,78 @@ def enum_subdomains(domain_list_file):
 def dns_enum(subdomains_file):
     print("[*] CNAMEs and TXTs enumeration...")
     output_file = os.path.join(OUTPUT_DIR, "dns_records.txt")
-    cmd = f"cat {subdomains_file} | dnsx -cname -txt -silent"
+    cmd = f"dnsx -cname -txt -silent -re -l {subdomains_file} -o {output_file}"
     dns_output = run_cmd(cmd)
-    if dns_output:
-        with open(output_file, "w") as f:
-            f.write(dns_output)
     return output_file
 
 def filter_takeover_candidates_step(dns_file):
     print("[*] Filtering candidates...")
     candidates_file = os.path.join(OUTPUT_DIR, "takeover_candidates.txt")
-    cmd = (
-        f"cat {dns_file} | grep -iE "
-        "'(azure|aws|s3\\.amazonaws|github|amazonaws|heroku|cloudfront|fastly|cloudapp|"
-        "azurewebsites|netlify|pageserve|unbounce|wordpress|zendesk|desk\\.com|stripe)'"
-    )
+    cmd = f"grep 'CNAME' {dns_file} | sed 's/\\[[0-9;]*m//g' | awk '{{print $1 ' -> ' $NF}}' | sed 's/\\]//' | sort -u"
     output = run_cmd(cmd)
     if output:
         with open(candidates_file, "w") as f:
             f.write(output)
     return candidates_file
 
-def check_online_hosts(candidates_file):
+def get_takeover_candidates_hosts(candidates_file):
+    candidates_hosts = []
+    try:
+        with open(candidates_file, "r") as f:
+            for line in f:
+                if '->' in line:
+                    host = line.split('->')[0].strip()
+                    candidates_hosts.append(host)
+    except Exception as e:
+        print(f"[!] Error loading takeover candidates: {e}")
+    candidadtes_hosts_file = os.path.join(OUTPUT_DIR, "takeover_candidates_hosts.txt")
+    with open(candidadtes_hosts_file, "w") as f:
+        for host in candidates_hosts:
+            f.write(f"{host}\n")
+    return candidadtes_hosts_file
+
+def get_takeover_candidates_targets(candidates_file):
+    candidates_targets = []
+    try:
+        with open(candidates_file, "r") as f:
+            for line in f:
+                if '->' in line:
+                    target = line.split('->')[1].strip()
+                    candidates_targets.append(target)
+    except Exception as e:
+        print(f"[!] Error loading takeover candidates: {e}")
+    candidadtes_targets_file = os.path.join(OUTPUT_DIR, "takeover_candidates_targets.txt")
+    with open(candidadtes_targets_file, "w") as f:
+        for target in candidates_targets:
+            f.write(f"{target}\n")
+    return candidadtes_targets_file
+
+def check_online_hosts(candidadtes_hosts_file):
     print("[*] Checking online hosts...")
     online_file = os.path.join(OUTPUT_DIR, "online_candidates.txt")
-    cmd = f"cat {candidates_file} | httpx -silent"
+    cmd = f"httpx -silent -l {candidadtes_hosts_file}"
     output = run_cmd(cmd)
     if output:
         with open(online_file, "w") as f:
             f.write(output)
     return online_file
 
-def load_online_candidates(online_file):
-    try:
-        with open(online_file, "r") as f:
-            return [line.strip().split()[0] for line in f if line.strip()]
-    except Exception as e:
-        print(f"[!] Error loading online subdomains: {e}")
-        return []
 
-def map_candidates_to_templates(candidates_subdomains):
-    print("[*] Mapping candidates to Nuclei templates...")
-    mapped = {}
-    with open(os.path.join(OUTPUT_DIR, "dns_records.txt")) as f:
-        lines = [line.strip() for line in f.readlines()]
-    dns_map = {line.split()[0]: line for line in lines if line}
-
-    for sub in candidates_subdomains:
-        dns_line = dns_map.get(sub, "")
-        for keyword, template in TAKEOVER_MAP.items():
-            if keyword in dns_line.lower():
-                if sub not in mapped:
-                    mapped[sub] = []
-                mapped[sub].append(template)
-    return mapped
-
-def run_nuclei_scan(candidates_map):
+def run_nuclei_scan(candidadtes_hosts_file):
     print("[*] Executing nuclei scan...")
     csv_file = os.path.join(OUTPUT_DIR, "final_results.csv")
     results = []
 
-    for host, templates in candidates_map.items():
+    for host in candidadtes_hosts_file:
         vulnerable = "not vulnerable"
-        for tpl in templates:
-            tpl_path = os.path.join(NUCLEI_TEMPLATE_DIR, tpl)
-            print(f"[+] Scanning {host} with template {tpl}...")
-            cmd = f"nuclei -u {host} -t {tpl_path} -silent"
-            result = run_cmd(cmd)
-            if result:
-                vulnerable = "vulnerable"
-                output_path = os.path.join(OUTPUT_DIR, f"{host.replace('http://','').replace('https://','').replace('/','_')}_takeover.txt")
-                with open(output_path, "w") as f:
-                    f.write(result)
-                print(f"[!] Result saved in: {output_path}")
-                break
+        cmd = f"nuclei -u {host} -t {NUCLEI_TEMPLATE_DIR} -silent"
+        result = run_cmd(cmd)
+        if result:
+            vulnerable = "vulnerable"
+            output_path = os.path.join(OUTPUT_DIR, f"{host.replace('http://','').replace('https://','').replace('/','_')}_takeover.txt")
+            with open(output_path, "w") as f:
+                f.write(result)
+            print(f"[!] Result saved in: {output_path}")
         results.append([host, vulnerable, ""])
 
     with open(csv_file, "w", newline="") as f:

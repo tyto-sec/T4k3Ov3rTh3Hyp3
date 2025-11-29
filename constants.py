@@ -2,36 +2,43 @@ CNAME_FINGERPRINTS = {
     # Nomes padronizados para corresponder aos templates e CNAMEs
     "Aftership": ["aftership"], 
     "AgileCRM": ["agilecrm\\.com"],
-    "Aha": ["aha\\.io"], # Ajustado de 'Aha!' para 'Aha'
-    "Airee": ["airee\\.com"],
-    "Anima": ["animaapp\\.com"],
+    "Aha": ["aha\\.io"],
+    "Airee": ["airee\\.ru"],
+    "Anima": ["animaapp\\.io"],
     "Announcekit": ["announcekit\\.app"],
     
     # Cloud Providers
-    "AWS_S3": ["s3\\.amazonaws\\.com", "s3-website-"], # Genérico para S3
+    "AWS_S3": ["s3\\.amazonaws\\.com", "s3-website-"],
+    "AWS_Beastalk": ["elasticbeanstalk\\.com"],
+    "AWS_ELB": ["elb\\.amazonaws\\.com"],
     "Wasabi_S3": ["wasabisys\\.com"],
     "AWS_Global_Accelerator": ["awsglobalaccelerator\\.com"],
     "Azure": [
         "cloudapps\\.net", "azurewebsites\\.net", "cloudapp\\.net", "cloudapp\\.com", 
         "azureedge\\.net", "azurefd\\.net", "azurestaticapps\\.net", "cloudapp\\.azure\\.com", 
-        "storage\\.azure\\.net", "trafficmanager\\.net"
+        "storage\\.azure\\.net", "trafficmanager\\.net", 
+        "blob\\.core\\.windows\\.net", "azure-api\\.net", "azurehdinsight\\.net", 
+        "azurecontainer\\.io", "database\\.windows\\.net", "azuredatalakestore\\.net", 
+        "search\\.windows\\.net", "azurecr\\.io", "redis\\.cache\\.windows\\.net", 
+        "servicebus\\.windows\\.net", "visualstudio\\.com"
     ],
-    "Google_Apps": ["ghs\\.googlehosted\\.com"], # Não tem template, mas é um CNAME importante
-    "Google_Cloud_Storage": ["storage\\.googleapis\\.com"], # Não tem template
-    "Cloudflare_Pages": ["pages\\.dev"], # Não tem template
+    "Google_Apps": ["ghs\\.googlehosted\\.com"],
+    "Google_Cloud_Storage": ["storage\\.googleapis\\.com"], 
+    "Cloudflare_Pages": ["pages\\.dev"], 
     
     # PaaS/Hosting
     "Heroku": ["herokudns\\.com", "herokuapp\\.com"],
     "Netlify": ["netlify\\.com", "netlify\\.app"],
     "Vercel": ["cname\\.vercel-dns\\.com"],
-    "GitHub_Pages": ["github\\.io", "github\\.com"],
-    "Surge": ["surge\\.sh"],
+    "Github": ["github\\.io", "github\\.com"],
+    "Surge": ["surge\\.sh", "na-west1\\.surge\\.sh"],
     "Pantheon": ["pantheonsite\\.io"],
     "Kinsta": ["kinsta\\.cloud"],
-    "Clever": ["clever-cloud\\.com"], # Corresponde ao template 'clever'
+    "Clever": ["clever-cloud\\.com"], 
     "Meteor": ["meteor\\.com"], 
-    "Platform_SH": ["platformsh\\.site", "platform\\.sh"], # Adicionado um nome genérico
-    
+    "Platform_SH": ["platformsh\\.site", "platform\\.sh"],
+    "Ngrok": ["ngrok\\.io"], # Adicionado Ngrok
+
     # E-commerce, Marketing, CMS
     "Shopify": ["myshopify\\.com"],
     "BigCartel": ["bigcartel\\.com"],
@@ -40,24 +47,25 @@ CNAME_FINGERPRINTS = {
     "GetResponse": ["getresponsepages\\.com", "getresponse\\.com"],
     "Wishpond": ["wishpond\\.com"],
     "HubSpot": ["hubspot\\.net", "hubspot"],
-    "Unbounce": ["unbouncepages\\.com", "instapage\\.com"], # Agrupado Unbounce/Instapage
+    "Unbounce": ["unbouncepages\\.com", "instapage\\.com"],
     "Simplebooklet": ["simplebooklet\\.com"],
     "SmugMug": ["smugmug\\.com"],
     "Tilda": ["tilda\\.ws", "tilda\\.cc"],
-    "Strikingly": ["strikinglydn\\.com"],
+    "Strikingly": ["strikinglydn\\.com", "s\\.strikinglydns\\.com"],
     "WordPress": ["wordpress\\.com", "wpengine\\.com"],
     "Wix": ["wixsite\\.com"],
-    
+    "CargoCollective": ["cargo\\.site", "cargocollective\\.com"],
+
     # Docs, Suporte, CRM
-    "Zendesk": ["zendesk\\.com", "desk\\.com"], # Corresponde ao template 'zendesk'
+    "Zendesk": ["zendesk\\.com", "desk\\.com"], 
     "HelpScout": ["helpscoutdocs\\.com", "helpscoutsites\\.com"],
     "HelpDocs": ["helpdocs\\.io", "dot-docs\\.com"],
     "Helprace": ["helprace\\.com"],
     "Freshdesk": ["freshdesk\\.com", "freshservice\\.com"],
     "Ghost": ["ghost\\.io"],
-    "ReadTheDocs": ["readthedocs\\.io", "readthedocs\\.org", "readthedocsonline\\.com"],
+    "Readthedocs": ["readthedocs\\.io", "readthedocs\\.org", "readthedocsonline\\.com"],
     "GitBook": ["gitbook\\.io"],
-    "Readme": ["readme\\.io"], # Adicionado
+    "Readme": ["readme\\.io"], 
     "Intercom": ["intercom\\.website"],
     "Uservoice": ["uservoice\\.com"],
     
@@ -68,24 +76,25 @@ CNAME_FINGERPRINTS = {
     "Mailgun": ["mailgun\\.org"],
     "Mashery": ["mashery\\.com"],
     "Pingdom": ["pingdom\\.com"],
-    "UptimeRobot": ["uptimerobot\\.com"],
+    "UptimeRobot": ["uptimerobot\\.com", "stats\\.uptimerobot\\.com"],
     "GoHire": ["gohire\\.io"],
-    "Spreed": ["sprintful\\.com"], # Corrigido Sprintful para Spreed
-    "AgileCRM": ["agilecrm\\.com"],
+    "Spreed": ["sprintful\\.com"], 
     "Proposify": ["proposify\\.biz"],
     "Wufoo": ["wufoo\\.com"],
-    "JetBrains": ["jetbrains\\.com"],
+    "JetBrains": ["jetbrains\\.com", "youtrack\\.cloud"],
     "Flexbe": ["flexbe\\.net"],
     "Frontify": ["frontify\\.com"],
-    "Gemfury": ["gemfury\\.com"],
+    "Gemfury": ["gemfury\\.com", "furyns\\.com"],
     "SurveyGizmo": ["surveygizmo\\.com"],
     "SurveySparrow": ["surveysparrow\\.com"],
     "Tave": ["tave\\.com"],
     "Teamwork": ["teamwork\\.com"],
-    "Uberflip": ["uberflip\\.com"],
+    "Uberflip": ["uberflip\\.com", "read\\.uberflip\\.com"],
     "Vend": ["vendcommerce\\.com"],
     "Branch": ["custom\\.bnc\\.lt"], 
     "Acquia": ["acquia-sites\\.com"],
+    "SmartJobBoard": ["smartjob\\.com"],
+    "Squadcast": ["squadcast\\.io"], 
 }
 
 
@@ -111,7 +120,7 @@ TAKEOVER_MAP = {
     "GetResponse": "takeovers/getresponse-takeover.yaml",
     "Ghost": "takeovers/ghost-takeover.yaml",
     "GitBook": "takeovers/gitbook-takeover.yaml",
-    "GitHub_Pages": "takeovers/github-takeover.yaml",
+    "Github": "takeovers/github-takeover.yaml",
     "GoHire": "takeovers/gohire-takeover.yaml",
     "Greatpages": "takeovers/greatpages-takeover.yaml",
     "Hatenablog": "takeovers/hatenablog-takeover.yaml",

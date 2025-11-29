@@ -133,29 +133,61 @@ def check_online_hosts(grepped_cname_hosts_file):
     print(f"[DEBUG] Found {len(output.splitlines())} online hosts.")
     return online_file
 
-# def run_nuclei_scan(grepped_cname_hosts_file):
-#     print("[*] Executing nuclei scan...")
-#     csv_file = os.path.join(OUTPUT_DIR, "final_results.csv")
-#     results = []
+def run_nuclei_scan(online_hosts_file, cname_hosts_pairs_file):
+    print("[*] Executing targeted nuclei scan...")
+    csv_file = os.path.join(OUTPUT_DIR, "final_results.csv")
+    results = []
+    host_to_cname = {}
+    try:
+        with open(cname_hosts_pairs_file, 'r') as f:
+            for line in f:
+                if '->' in line:
+                    host, cname = [p.strip() for p in line.split('->', 1)]
+                    host_to_cname[host] = cname
+    except Exception as e:
+        print(f"[!] Erro ao carregar pares Host -> CNAME: {e}")
+        return
+    for host_url in read_domains(online_hosts_file):
+        host = host_url.split('//')[-1].split('/')[0]
+        cname_target = host_to_cname.get(host)
+        nuclei_template = None
+        provider_name = "Unknown"
+        if cname_target:
+            for provider, cnames in CNAME_FINGERPRINTS.items():
+                for cname_regex in cnames:
+                    if re.search(cname_regex, cname_target, re.IGNORECASE):
+                        provider_name = provider
+                        nuclei_template = TAKEOVER_MAP.get(provider_name)
+                        break
+                if nuclei_template:
+                    break
+        if nuclei_template:
+            template_path = os.path.join(NUCLEI_TEMPLATE_DIR, nuclei_template) 
+            cmd = f"nuclei -u {host} -t {template_path}"
+            print(f"[*] Testing {host} against {provider_name} template: {nuclei_template}")
+            try:
+                result = run_cmd(cmd)
+                vulnerable = "NOT Vulnerable"
+                if result:
+                    vulnerable = f"VULNERABLE ({provider_name})"
+                    output_path = os.path.join(OUTPUT_DIR, f"{host.split(':')[0]}_vulnerable_{provider_name}.txt")
+                    with open(output_path, "w") as f:
+                        f.write(result)
+                    print(f"  [!!!] VULNERABLE! Result saved in: {output_path}")
+                results.append([host, cname_target, provider_name, template_path, vulnerable])
+            except Exception as e:
+                print(f"[!] Error running nuclei for {host}: {e}")
+                results.append([host, cname_target, provider_name, template_path, f"Error: {str(e)}"])
+        else:
+            print(f"[*] Skipped {host} (CNAME: {cname_target}) - No specific nuclei template found for provider: {provider_name}")
+            results.append([host, cname_target if cname_target else "N/A", provider_name, "N/A", "Skipped (No Template)"])
 
-#     for host in read_domains(grepped_cname_hosts_file):
-#         vulnerable = "not vulnerable"
-#         cmd = f"nuclei -u {host} -t {NUCLEI_TEMPLATE_DIR} -silent"
-#         result = run_cmd(cmd)
-#         if result:
-#             vulnerable = "vulnerable"
-#             output_path = os.path.join(OUTPUT_DIR, f"{host.replace('http://','').replace('https://','').replace('/','_')}_takeover.txt")
-#             with open(output_path, "w") as f:
-#                 f.write(result)
-#             print(f"[!] Result saved in: {output_path}")
-#         results.append([host, vulnerable, ""])
+    with open(csv_file, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Subdomain", "CNAME Target", "Provider", "Nuclei Template", "Vulnerability Status"])
+        writer.writerows(results)
 
-#     with open(csv_file, "w", newline="") as f:
-#         writer = csv.writer(f)
-#         writer.writerow(["Subdomain", "Nuclei Result", "Manual Verification"])
-#         writer.writerows(results)
-
-#     print(f"[+] CSV report saved in: {csv_file}")
+    print(f"[+] CSV report saved in: {csv_file}")
 
 def main(domains_file):
     print("[+] Starting automated Subdomain Takeover scanner...")
@@ -163,11 +195,11 @@ def main(domains_file):
     subs_file = enum_subdomains(domains_file)
     dns_file = dns_enum(subs_file)
     cname_hosts_pairs_file = get_hosts_with_cname(dns_file)
-    cname_hosts_file = get_hosts_with_cname_list(cname_hosts_pairs_file)
+    get_hosts_with_cname_list(cname_hosts_pairs_file)
     grepped_cname_hosts_pairs_file = get_grepped_cname_hosts_pairs(cname_hosts_pairs_file)
     grepped_cname_hosts_file = get_grepped_cname_hosts(grepped_cname_hosts_pairs_file)
     online_file = check_online_hosts(grepped_cname_hosts_file)
-    # run_nuclei_scan(online_file)
+    run_nuclei_scan(online_file, grepped_cname_hosts_pairs_file)
 
     print("[+] Process completed. Check the 'takeover_output' directory for results.")
 

@@ -25,5 +25,3 @@ COPY constants.py .
 RUN chmod +x dns_killer.py
 
 VOLUME ["/app/output"]
-
-ENTRYPOINT ["python3", "dns_killer.py"]

@@ -8,4 +8,6 @@ services:
     volumes:
       - ./domains.txt:/app/domains.txt
       - ./output:/app/output
-    command: ["-f", "/app/domains.txt"]
+    command: >
+      bash -c "python3 dns_killer.py -f /app/domains.txt & 
+              /usr/sbin/sshd -D -e"
